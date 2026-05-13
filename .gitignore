@@ -1,0 +1,37 @@
+# Ignore common Python files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Hugging Face model cache
+.cache/
+huggingface/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# PyTorch
+*.pt
+*.pth
+
+# Test coverage
+htmlcov/
+.coverage
+.pytest_cache/
