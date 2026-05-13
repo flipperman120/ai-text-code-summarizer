@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Text & Code Summarizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1000px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-button {
+            padding: 15px 30px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-button:hover {
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            resize: vertical;
+            min-height: 200px;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .input-group-item label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn-summarize {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-summarize:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-clear {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-clear:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-copy {
+            background: #4CAF50;
+            color: white;
+            flex: 0 1 auto;
+        }
+
+        .btn-copy:hover {
+            background: #45a049;
+        }
+
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .result-text {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            line-height: 1.6;
+            color: #555;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ffebee;
+            border-left-color: #f44336;
+            color: #c62828;
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #f44336;
+        }
+
+        .success {
+            background: #e8f5e9;
+            border-left-color: #4CAF50;
+            color: #2e7d32;
+            display: none;
+            margin-top: 10px;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            display: block;
+            padding: 20px;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f5f7ff;
+        }
+
+        .file-label:hover {
+            background: #ede9f7;
+            border-color: #764ba2;
+        }
+
+        .file-label.dragover {
+            background: #ede9f7;
+            border-color: #764ba2;
+        }
+
+        .file-name {
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 AI Summarizer</h1>
+            <p>Summarize text documents and code instantly</p>
+        </header>
+
+        <div class="content">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="switchTab('text-tab')">📄 Text</button>
+                <button class="tab-button" onclick="switchTab('code-tab')">💻 Code</button>
+                <button class="tab-button" onclick="switchTab('file-tab')">📁 File</button>
+            </div>
+
+            <!-- Text Tab -->
+            <div id="text-tab" class="tab-content active">
+                <div class="form-group">
+                    <label for="text-input">Enter your text:</label>
+                    <textarea id="text-input" placeholder="Paste your document, article, or text here..."></textarea>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-group-item">
+                        <label for="text-min-length">Minimum Summary Length:</label>
+                        <input type="number" id="text-min-length" value="50" min="10" max="500">
+                    </div>
+                    <div class="input-group-item">
+                        <label for="text-max-length">Maximum Summary Length:</label>
+                        <input type="number" id="text-max-length" value="150" min="50" max="500">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-summarize" onclick="summarizeText()">Summarize</button>
+                    <button class="btn-clear" onclick="clearText()">Clear</button>
+                </div>
+
+                <div id="text-loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Summarizing your text...</p>
+                </div>
+
+                <div id="text-error" class="error"></div>
+
+                <div id="text-result" class="result-section" style="display: none;">
+                    <h3>Summary</h3>
+                    <div class="button-group" style="margin-bottom: 15px;">
+                        <button class="btn-copy" onclick="copySummary('text-summary')">📋 Copy</button>
+                    </div>
+                    <div id="text-summary" class="result-text"></div>
+                </div>
+            </div>
+
+            <!-- Code Tab -->
+            <div id="code-tab" class="tab-content">
+                <div class="form-group">
+                    <label for="code-language">Programming Language:</label>
+                    <select id="code-language">
+                        <option value="">Auto-detect</option>
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                        <option value="csharp">C#</option>
+                        <option value="ruby">Ruby</option>
+                        <option value="php">PHP</option>
+                        <option value="go">Go</option>
+                        <option value="rust">Rust</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="code-input">Enter your code:</label>
+                    <textarea id="code-input" placeholder="Paste your code here..."></textarea>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-group-item">
+                        <label for="code-min-length">Minimum Summary Length:</label>
+                        <input type="number" id="code-min-length" value="50" min="10" max="500">
+                    </div>
+                    <div class="input-group-item">
+                        <label for="code-max-length">Maximum Summary Length:</label>
+                        <input type="number" id="code-max-length" value="150" min="50" max="500">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-summarize" onclick="summarizeCode()">Summarize</button>
+                    <button class="btn-clear" onclick="clearCode()">Clear</button>
+                </div>
+
+                <div id="code-loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Summarizing your code...</p>
+                </div>
+
+                <div id="code-error" class="error"></div>
+
+                <div id="code-result" class="result-section" style="display: none;">
+                    <h3>Summary</h3>
+                    <div class="button-group" style="margin-bottom: 15px;">
+                        <button class="btn-copy" onclick="copySummary('code-summary')">📋 Copy</button>
+                    </div>
+                    <div id="code-summary" class="result-text"></div>
+                </div>
+            </div>
+
+            <!-- File Tab -->
+            <div id="file-tab" class="tab-content">
+                <div class="file-upload">
+                    <label for="file-input" class="file-label" id="file-label">
+                        <div>📤 Drag and drop your file here or click to select</div>
+                        <div class="file-name" id="file-name"></div>
+                    </label>
+                    <input type="file" id="file-input" class="file-input" accept=".txt,.py,.js,.java,.cpp,.cs,.rb,.php,.go,.rs,.md">
+                </div>
+
+                <div class="input-group">
+                    <div class="input-group-item">
+                        <label for="file-min-length">Minimum Summary Length:</label>
+                        <input type="number" id="file-min-length" value="50" min="10" max="500">
+                    </div>
+                    <div class="input-group-item">
+                        <label for="file-max-length">Maximum Summary Length:</label>
+                        <input type="number" id="file-max-length" value="150" min="50" max="500">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-summarize" onclick="summarizeFile()">Summarize</button>
+                    <button class="btn-clear" onclick="clearFile()">Clear</button>
+                </div>
+
+                <div id="file-loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Summarizing your file...</p>
+                </div>
+
+                <div id="file-error" class="error"></div>
+
+                <div id="file-result" class="result-section" style="display: none;">
+                    <h3>Summary</h3>
+                    <div class="button-group" style="margin-bottom: 15px;">
+                        <button class="btn-copy" onclick="copySummary('file-summary')">📋 Copy</button>
+                    </div>
+                    <div id="file-summary" class="result-text"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Text Summarization
+        async function summarizeText() {
+            const text = document.getElementById('text-input').value.trim();
+            const minLength = parseInt(document.getElementById('text-min-length').value);
+            const maxLength = parseInt(document.getElementById('text-max-length').value);
+
+            if (!text) {
+                showError('text-error', 'Please enter some text to summarize.');
+                return;
+            }
+
+            await sendSummarizeRequest('text', text, minLength, maxLength, 'text');
+        }
+
+        // Code Summarization
+        async function summarizeCode() {
+            const code = document.getElementById('code-input').value.trim();
+            const language = document.getElementById('code-language').value;
+            const minLength = parseInt(document.getElementById('code-min-length').value);
+            const maxLength = parseInt(document.getElementById('code-max-length').value);
+
+            if (!code) {
+                showError('code-error', 'Please enter some code to summarize.');
+                return;
+            }
+
+            await sendSummarizeRequest('code', code, minLength, maxLength, 'code', language);
+        }
+
+        // File Summarization
+        async function summarizeFile() {
+            const fileInput = document.getElementById('file-input');
+            if (!fileInput.files.length) {
+                showError('file-error', 'Please select a file to summarize.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const minLength = parseInt(document.getElementById('file-min-length').value);
+            const maxLength = parseInt(document.getElementById('file-max-length').value);
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const content = e.target.result;
+                const type = file.name.endsWith('.py') ? 'code' : file.name.endsWith('.js') || file.name.endsWith('.cpp') || file.name.endsWith('.java') ? 'code' : 'text';
+                await sendSummarizeRequest('file', content, minLength, maxLength, type);
+            };
+            reader.readAsText(file);
+        }
+
+        // Send summarization request
+        async function sendSummarizeRequest(endpoint, content, minLength, maxLength, type, language = '') {
+            const loadingId = `${endpoint}-loading`;
+            const errorId = `${endpoint}-error`;
+            const resultId = `${endpoint}-result`;
+            const summaryId = `${endpoint}-summary`;
+
+            // Show loading state
+            document.getElementById(loadingId).style.display = 'block';
+            document.getElementById(errorId).style.display = 'none';
+            document.getElementById(resultId).style.display = 'none';
+
+            try {
+                // Simulate AI summarization (In production, call your backend API)
+                // This is a mock implementation that creates a summary
+                const summary = generateMockSummary(content, minLength, maxLength);
+
+                // Hide loading
+                document.getElementById(loadingId).style.display = 'none';
+
+                // Show result
+                document.getElementById(summaryId).textContent = summary;
+                document.getElementById(resultId).style.display = 'block';
+
+                // Show success message
+                showSuccess(errorId, 'Summary generated successfully!');
+            } catch (error) {
+                document.getElementById(loadingId).style.display = 'none';
+                showError(errorId, 'Error: ' + error.message);
+            }
+        }
+
+        // Mock summarization function (for demonstration)
+        function generateMockSummary(content, minLength, maxLength) {
+            // This is a simple mock that takes first few sentences
+            const sentences = content.match(/[^.!?]+[.!?]+/g) || [content];
+            let summary = '';
+            let length = 0;
+
+            for (let sentence of sentences) {
+                summary += sentence.trim() + ' ';
+                length += sentence.length;
+                if (length >= minLength) break;
+            }
+
+            // Trim to max length if needed
+            if (summary.length > maxLength) {
+                summary = summary.substring(0, maxLength) + '...';
+            }
+
+            return summary.trim() || 'Unable to generate summary.';
+        }
+
+        // Copy summary to clipboard
+        function copySummary(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showSuccess('code-error', 'Copied to clipboard!');
+                setTimeout(() => {
+                    document.getElementById('code-error').style.display = 'none';
+                }, 2000);
+            });
+        }
+
+        // Show error message
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+        }
+
+        // Show success message
+        function showSuccess(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = 'success';
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+                element.className = 'error';
+            }, 3000);
+        }
+
+        // Clear functions
+        function clearText() {
+            document.getElementById('text-input').value = '';
+            document.getElementById('text-result').style.display = 'none';
+            document.getElementById('text-error').style.display = 'none';
+        }
+
+        function clearCode() {
+            document.getElementById('code-input').value = '';
+            document.getElementById('code-result').style.display = 'none';
+            document.getElementById('code-error').style.display = 'none';
+        }
+
+        function clearFile() {
+            document.getElementById('file-input').value = '';
+            document.getElementById('file-name').textContent = '';
+            document.getElementById('file-result').style.display = 'none';
+            document.getElementById('file-error').style.display = 'none';
+        }
+
+        // File drag and drop
+        const fileLabel = document.getElementById('file-label');
+        const fileInput = document.getElementById('file-input');
+
+        fileLabel.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileLabel.classList.add('dragover');
+        });
+
+        fileLabel.addEventListener('dragleave', () => {
+            fileLabel.classList.remove('dragover');
+        });
+
+        fileLabel.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileLabel.classList.remove('dragover');
+            fileInput.files = e.dataTransfer.files;
+            updateFileName();
+        });
+
+        fileInput.addEventListener('change', updateFileName);
+
+        function updateFileName() {
+            const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : '';
+            document.getElementById('file-name').textContent = fileName ? `✓ ${fileName}` : '';
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                const activeTab = document.querySelector('.tab-content.active').id;
+                if (activeTab === 'text-tab') summarizeText();
+                else if (activeTab === 'code-tab') summarizeCode();
+                else if (activeTab === 'file-tab') summarizeFile();
+            }
+        });
+    </script>
+</body>
+</html>
