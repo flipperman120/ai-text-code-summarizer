@@ -256,7 +256,7 @@
             margin-top: 15px;
             display: flex;
             gap: 10px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
         }
 
         .check-button {
@@ -269,6 +269,8 @@
             font-size: 0.9em;
             font-weight: 600;
             transition: all 0.3s ease;
+            flex: 1;
+            white-space: nowrap;
         }
 
         .check-button:hover:not(:disabled) {
@@ -291,6 +293,8 @@
             font-size: 0.9em;
             font-weight: 600;
             transition: all 0.3s ease;
+            flex: 1;
+            white-space: nowrap;
         }
 
         .ai-detect-button:hover:not(:disabled) {
@@ -299,6 +303,30 @@
         }
 
         .ai-detect-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .summarize-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        .summarize-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .summarize-button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
@@ -773,6 +801,7 @@
                     <div class="checker-buttons">
                         <button class="check-button" id="text-check-btn" onclick="checkGrammarText()">✏️ Check Grammar & Spelling</button>
                         <button class="ai-detect-button" id="text-ai-btn" onclick="detectAIText()">🔍 Detect AI Content</button>
+                        <button class="summarize-button" id="text-summarize-inline-btn" onclick="summarizeText()">📝 Summarize</button>
                     </div>
                     <div id="text-grammar-results" class="checker-results grammar-results"></div>
                     <div id="text-ai-results" class="checker-results ai-results"></div>
@@ -790,7 +819,6 @@
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-summarize" id="text-summarize-btn" onclick="summarizeText()">Summarize</button>
                     <button class="btn-clear" onclick="clearText()">Clear</button>
                 </div>
 
@@ -1331,12 +1359,18 @@
             const resultId = `${endpoint}-result`;
             const summaryId = `${endpoint}-summary`;
             const btnId = `${endpoint}-summarize-btn`;
+            const inlineBtnId = `${endpoint}-summarize-inline-btn`;
 
             // Show loading state and disable button
             document.getElementById(loadingId).classList.add('active');
             document.getElementById(errorId).style.display = 'none';
             document.getElementById(resultId).style.display = 'none';
-            document.getElementById(btnId).disabled = true;
+            if (document.getElementById(btnId)) {
+                document.getElementById(btnId).disabled = true;
+            }
+            if (document.getElementById(inlineBtnId)) {
+                document.getElementById(inlineBtnId).disabled = true;
+            }
 
             try {
                 // Simulate AI summarization with delay
@@ -1346,7 +1380,12 @@
 
                 // Hide loading and re-enable button
                 document.getElementById(loadingId).classList.remove('active');
-                document.getElementById(btnId).disabled = false;
+                if (document.getElementById(btnId)) {
+                    document.getElementById(btnId).disabled = false;
+                }
+                if (document.getElementById(inlineBtnId)) {
+                    document.getElementById(inlineBtnId).disabled = false;
+                }
 
                 // Show result
                 document.getElementById(summaryId).textContent = summary;
@@ -1356,7 +1395,12 @@
                 showSuccess(errorId, '✓ Summary generated successfully!');
             } catch (error) {
                 document.getElementById(loadingId).classList.remove('active');
-                document.getElementById(btnId).disabled = false;
+                if (document.getElementById(btnId)) {
+                    document.getElementById(btnId).disabled = false;
+                }
+                if (document.getElementById(inlineBtnId)) {
+                    document.getElementById(inlineBtnId).disabled = false;
+                }
                 showError(errorId, '❌ Error: ' + error.message);
             }
         }
