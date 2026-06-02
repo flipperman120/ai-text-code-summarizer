@@ -131,10 +131,12 @@
             background: white;
             border-radius: 15px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 1000px;
+            max-width: 1200px;
             width: 100%;
             overflow: hidden;
             animation: slideInUp 0.6s ease-out;
+            display: flex;
+            max-height: 90vh;
         }
 
         @keyframes slideInUp {
@@ -148,11 +150,19 @@
             }
         }
 
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
         header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 40px 30px;
             text-align: center;
+            flex-shrink: 0;
         }
 
         header h1 {
@@ -167,6 +177,123 @@
 
         .content {
             padding: 40px 30px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* History Sidebar */
+        .history-sidebar {
+            width: 300px;
+            background: #f5f5f5;
+            border-left: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .history-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .history-header-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .clear-history-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid white;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+        }
+
+        .clear-history-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .history-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            border-left: 3px solid #667eea;
+            transition: all 0.2s ease;
+            font-size: 0.9em;
+        }
+
+        .history-item:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+
+        .history-item.active {
+            background: #e8f0fe;
+            border-left-color: #1f2937;
+        }
+
+        .history-item-title {
+            font-weight: 600;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 260px;
+        }
+
+        .history-item-type {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .history-item-time {
+            font-size: 0.75em;
+            color: #bbb;
+            margin-top: 4px;
+        }
+
+        .history-item-delete {
+            display: inline-block;
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 2px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.75em;
+            margin-top: 6px;
+        }
+
+        .history-item-delete:hover {
+            background: #d32f2f;
+        }
+
+        .no-history {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-size: 0.9em;
         }
 
         .tabs {
@@ -727,6 +854,17 @@
         }
 
         @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .history-sidebar {
+                width: 100%;
+                max-height: 200px;
+                border-left: none;
+                border-bottom: 1px solid #ddd;
+            }
+
             .input-group {
                 grid-template-columns: 1fr;
             }
@@ -778,181 +916,330 @@
     </div>
 
     <div class="container">
-        <header>
-            <h1>🤖 AI Summarizer & Detector</h1>
-            <p>Summarize text, check grammar, and detect AI-written content</p>
-        </header>
+        <div class="main-content">
+            <header>
+                <h1>🤖 AI Summarizer & Detector</h1>
+                <p>Summarize text, check grammar, and detect AI-written content</p>
+            </header>
 
-        <div class="content">
-            <!-- Tabs -->
-            <div class="tabs">
-                <button class="tab-button active" onclick="switchTab('text-tab')">📄 Text</button>
-                <button class="tab-button" onclick="switchTab('code-tab')">💻 Code</button>
-                <button class="tab-button" onclick="switchTab('file-tab')">📁 File</button>
+            <div class="content">
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab-button active" onclick="switchTab('text-tab')">📄 Text</button>
+                    <button class="tab-button" onclick="switchTab('code-tab')">💻 Code</button>
+                    <button class="tab-button" onclick="switchTab('file-tab')">📁 File</button>
+                </div>
+
+                <!-- Text Tab -->
+                <div id="text-tab" class="tab-content active">
+                    <div class="form-group">
+                        <label for="text-input">Enter your text:</label>
+                        <div class="textarea-wrapper">
+                            <textarea id="text-input" placeholder="Paste your document, article, or text here..."></textarea>
+                        </div>
+                        <div class="checker-buttons">
+                            <button class="check-button" id="text-check-btn" onclick="checkGrammarText()">✏️ Check Grammar & Spelling</button>
+                            <button class="ai-detect-button" id="text-ai-btn" onclick="detectAIText()">🔍 Detect AI Content</button>
+                            <button class="summarize-button" id="text-summarize-inline-btn" onclick="summarizeText()">📝 Summarize</button>
+                        </div>
+                        <div id="text-grammar-results" class="checker-results grammar-results"></div>
+                        <div id="text-ai-results" class="checker-results ai-results"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-group-item">
+                            <label for="text-min-length">Minimum Summary Length:</label>
+                            <input type="number" id="text-min-length" value="50" min="10" max="500">
+                        </div>
+                        <div class="input-group-item">
+                            <label for="text-max-length">Maximum Summary Length:</label>
+                            <input type="number" id="text-max-length" value="150" min="50" max="500">
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-clear" onclick="clearText()">Clear</button>
+                    </div>
+
+                    <div id="text-loading" class="loading">
+                        <div class="spinner"></div>
+                        <div class="loading-text">Summarizing your text</div>
+                        <div class="loading-dots">
+                            <span class="dot">.</span>
+                            <span class="dot">.</span>
+                            <span class="dot">.</span>
+                        </div>
+                    </div>
+
+                    <div id="text-error" class="error"></div>
+
+                    <div id="text-result" class="result-section" style="display: none;">
+                        <h3>Summary</h3>
+                        <div class="button-group" style="margin-bottom: 15px;">
+                            <button class="btn-copy" onclick="copySummary('text-summary')">📋 Copy</button>
+                        </div>
+                        <div id="text-summary" class="result-text"></div>
+                    </div>
+                </div>
+
+                <!-- Code Tab -->
+                <div id="code-tab" class="tab-content">
+                    <div class="form-group">
+                        <label for="code-language">Programming Language:</label>
+                        <select id="code-language">
+                            <option value="">Auto-detect</option>
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                            <option value="csharp">C#</option>
+                            <option value="ruby">Ruby</option>
+                            <option value="php">PHP</option>
+                            <option value="go">Go</option>
+                            <option value="rust">Rust</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="code-input">Enter your code:</label>
+                        <textarea id="code-input" placeholder="Paste your code here..."></textarea>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-group-item">
+                            <label for="code-min-length">Minimum Summary Length:</label>
+                            <input type="number" id="code-min-length" value="50" min="10" max="500">
+                        </div>
+                        <div class="input-group-item">
+                            <label for="code-max-length">Maximum Summary Length:</label>
+                            <input type="number" id="code-max-length" value="150" min="50" max="500">
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-summarize" id="code-summarize-btn" onclick="summarizeCode()">Summarize</button>
+                        <button class="btn-clear" onclick="clearCode()">Clear</button>
+                    </div>
+
+                    <div id="code-loading" class="loading">
+                        <div class="spinner"></div>
+                        <div class="loading-text">Summarizing your code</div>
+                        <div class="loading-dots">
+                            <span class="dot">.</span>
+                            <span class="dot">.</span>
+                            <span class="dot">.</span>
+                        </div>
+                    </div>
+
+                    <div id="code-error" class="error"></div>
+
+                    <div id="code-result" class="result-section" style="display: none;">
+                        <h3>Summary</h3>
+                        <div class="button-group" style="margin-bottom: 15px;">
+                            <button class="btn-copy" onclick="copySummary('code-summary')">📋 Copy</button>
+                        </div>
+                        <div id="code-summary" class="result-text"></div>
+                    </div>
+                </div>
+
+                <!-- File Tab -->
+                <div id="file-tab" class="tab-content">
+                    <div class="file-upload">
+                        <label for="file-input" class="file-label" id="file-label">
+                            <div>📤 Drag and drop your file here or click to select</div>
+                            <div class="file-name" id="file-name"></div>
+                        </label>
+                        <input type="file" id="file-input" class="file-input" accept=".txt,.py,.js,.java,.cpp,.cs,.rb,.php,.go,.rs,.md">
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-group-item">
+                            <label for="file-min-length">Minimum Summary Length:</label>
+                            <input type="number" id="file-min-length" value="50" min="10" max="500">
+                        </div>
+                        <div class="input-group-item">
+                            <label for="file-max-length">Maximum Summary Length:</label>
+                            <input type="number" id="file-max-length" value="150" min="50" max="500">
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-summarize" id="file-summarize-btn" onclick="summarizeFile()">Summarize</button>
+                        <button class="btn-clear" onclick="clearFile()">Clear</button>
+                    </div>
+
+                    <div id="file-loading" class="loading">
+                        <div class="spinner"></div>
+                        <div class="loading-text">Summarizing your file</div>
+                        <div class="loading-dots">
+                            <span class="dot">.</span>
+                            <span class="dot">.</span>
+                            <span class="dot">.</span>
+                        </div>
+                    </div>
+
+                    <div id="file-error" class="error"></div>
+
+                    <div id="file-result" class="result-section" style="display: none;">
+                        <h3>Summary</h3>
+                        <div class="button-group" style="margin-bottom: 15px;">
+                            <button class="btn-copy" onclick="copySummary('file-summary')">📋 Copy</button>
+                        </div>
+                        <div id="file-summary" class="result-text"></div>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <!-- Text Tab -->
-            <div id="text-tab" class="tab-content active">
-                <div class="form-group">
-                    <label for="text-input">Enter your text:</label>
-                    <div class="textarea-wrapper">
-                        <textarea id="text-input" placeholder="Paste your document, article, or text here..."></textarea>
-                    </div>
-                    <div class="checker-buttons">
-                        <button class="check-button" id="text-check-btn" onclick="checkGrammarText()">✏️ Check Grammar & Spelling</button>
-                        <button class="ai-detect-button" id="text-ai-btn" onclick="detectAIText()">🔍 Detect AI Content</button>
-                        <button class="summarize-button" id="text-summarize-inline-btn" onclick="summarizeText()">📝 Summarize</button>
-                    </div>
-                    <div id="text-grammar-results" class="checker-results grammar-results"></div>
-                    <div id="text-ai-results" class="checker-results ai-results"></div>
+        <!-- History Sidebar -->
+        <div class="history-sidebar">
+            <div class="history-header">
+                <div class="history-header-title">
+                    📋 History
                 </div>
-
-                <div class="input-group">
-                    <div class="input-group-item">
-                        <label for="text-min-length">Minimum Summary Length:</label>
-                        <input type="number" id="text-min-length" value="50" min="10" max="500">
-                    </div>
-                    <div class="input-group-item">
-                        <label for="text-max-length">Maximum Summary Length:</label>
-                        <input type="number" id="text-max-length" value="150" min="50" max="500">
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn-clear" onclick="clearText()">Clear</button>
-                </div>
-
-                <div id="text-loading" class="loading">
-                    <div class="spinner"></div>
-                    <div class="loading-text">Summarizing your text</div>
-                    <div class="loading-dots">
-                        <span class="dot">.</span>
-                        <span class="dot">.</span>
-                        <span class="dot">.</span>
-                    </div>
-                </div>
-
-                <div id="text-error" class="error"></div>
-
-                <div id="text-result" class="result-section" style="display: none;">
-                    <h3>Summary</h3>
-                    <div class="button-group" style="margin-bottom: 15px;">
-                        <button class="btn-copy" onclick="copySummary('text-summary')">📋 Copy</button>
-                    </div>
-                    <div id="text-summary" class="result-text"></div>
-                </div>
+                <button class="clear-history-btn" onclick="clearAllHistory()" title="Clear all history">Clear</button>
             </div>
-
-            <!-- Code Tab -->
-            <div id="code-tab" class="tab-content">
-                <div class="form-group">
-                    <label for="code-language">Programming Language:</label>
-                    <select id="code-language">
-                        <option value="">Auto-detect</option>
-                        <option value="python">Python</option>
-                        <option value="javascript">JavaScript</option>
-                        <option value="java">Java</option>
-                        <option value="cpp">C++</option>
-                        <option value="csharp">C#</option>
-                        <option value="ruby">Ruby</option>
-                        <option value="php">PHP</option>
-                        <option value="go">Go</option>
-                        <option value="rust">Rust</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="code-input">Enter your code:</label>
-                    <textarea id="code-input" placeholder="Paste your code here..."></textarea>
-                </div>
-
-                <div class="input-group">
-                    <div class="input-group-item">
-                        <label for="code-min-length">Minimum Summary Length:</label>
-                        <input type="number" id="code-min-length" value="50" min="10" max="500">
-                    </div>
-                    <div class="input-group-item">
-                        <label for="code-max-length">Maximum Summary Length:</label>
-                        <input type="number" id="code-max-length" value="150" min="50" max="500">
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn-summarize" id="code-summarize-btn" onclick="summarizeCode()">Summarize</button>
-                    <button class="btn-clear" onclick="clearCode()">Clear</button>
-                </div>
-
-                <div id="code-loading" class="loading">
-                    <div class="spinner"></div>
-                    <div class="loading-text">Summarizing your code</div>
-                    <div class="loading-dots">
-                        <span class="dot">.</span>
-                        <span class="dot">.</span>
-                        <span class="dot">.</span>
-                    </div>
-                </div>
-
-                <div id="code-error" class="error"></div>
-
-                <div id="code-result" class="result-section" style="display: none;">
-                    <h3>Summary</h3>
-                    <div class="button-group" style="margin-bottom: 15px;">
-                        <button class="btn-copy" onclick="copySummary('code-summary')">📋 Copy</button>
-                    </div>
-                    <div id="code-summary" class="result-text"></div>
-                </div>
-            </div>
-
-            <!-- File Tab -->
-            <div id="file-tab" class="tab-content">
-                <div class="file-upload">
-                    <label for="file-input" class="file-label" id="file-label">
-                        <div>📤 Drag and drop your file here or click to select</div>
-                        <div class="file-name" id="file-name"></div>
-                    </label>
-                    <input type="file" id="file-input" class="file-input" accept=".txt,.py,.js,.java,.cpp,.cs,.rb,.php,.go,.rs,.md">
-                </div>
-
-                <div class="input-group">
-                    <div class="input-group-item">
-                        <label for="file-min-length">Minimum Summary Length:</label>
-                        <input type="number" id="file-min-length" value="50" min="10" max="500">
-                    </div>
-                    <div class="input-group-item">
-                        <label for="file-max-length">Maximum Summary Length:</label>
-                        <input type="number" id="file-max-length" value="150" min="50" max="500">
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn-summarize" id="file-summarize-btn" onclick="summarizeFile()">Summarize</button>
-                    <button class="btn-clear" onclick="clearFile()">Clear</button>
-                </div>
-
-                <div id="file-loading" class="loading">
-                    <div class="spinner"></div>
-                    <div class="loading-text">Summarizing your file</div>
-                    <div class="loading-dots">
-                        <span class="dot">.</span>
-                        <span class="dot">.</span>
-                        <span class="dot">.</span>
-                    </div>
-                </div>
-
-                <div id="file-error" class="error"></div>
-
-                <div id="file-result" class="result-section" style="display: none;">
-                    <h3>Summary</h3>
-                    <div class="button-group" style="margin-bottom: 15px;">
-                        <button class="btn-copy" onclick="copySummary('file-summary')">📋 Copy</button>
-                    </div>
-                    <div id="file-summary" class="result-text"></div>
-                </div>
+            <div class="history-list" id="history-list">
+                <div class="no-history">No history yet</div>
             </div>
         </div>
     </div>
 
     <script>
+        // ============ HISTORY MANAGEMENT ============
+        const STORAGE_KEY = 'summarizer_history';
+        const MAX_HISTORY_ITEMS = 50;
+
+        class HistoryManager {
+            constructor() {
+                this.history = this.loadHistory();
+                this.renderHistory();
+            }
+
+            loadHistory() {
+                try {
+                    const stored = localStorage.getItem(STORAGE_KEY);
+                    return stored ? JSON.parse(stored) : [];
+                } catch (e) {
+                    console.error('Error loading history:', e);
+                    return [];
+                }
+            }
+
+            saveHistory() {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.history));
+                    this.renderHistory();
+                } catch (e) {
+                    console.error('Error saving history:', e);
+                }
+            }
+
+            addItem(content, summary, type, language = '') {
+                const item = {
+                    id: Date.now(),
+                    content: content.substring(0, 500),
+                    summary: summary,
+                    type: type,
+                    language: language,
+                    timestamp: new Date().toISOString(),
+                    title: content.substring(0, 50).replace(/\n/g, ' ') + (content.length > 50 ? '...' : '')
+                };
+
+                this.history.unshift(item);
+                if (this.history.length > MAX_HISTORY_ITEMS) {
+                    this.history.pop();
+                }
+                this.saveHistory();
+            }
+
+            removeItem(id) {
+                this.history = this.history.filter(item => item.id !== id);
+                this.saveHistory();
+            }
+
+            clearAll() {
+                if (confirm('Are you sure you want to clear all history? This cannot be undone.')) {
+                    this.history = [];
+                    this.saveHistory();
+                }
+            }
+
+            getItem(id) {
+                return this.history.find(item => item.id === id);
+            }
+
+            renderHistory() {
+                const historyList = document.getElementById('history-list');
+                if (this.history.length === 0) {
+                    historyList.innerHTML = '<div class="no-history">No history yet</div>';
+                    return;
+                }
+
+                historyList.innerHTML = this.history.map(item => `
+                    <div class="history-item" onclick="loadHistoryItem(${item.id})">
+                        <div class="history-item-title" title="${item.title}">${item.title}</div>
+                        <div class="history-item-type">
+                            ${item.type === 'text' ? '📄' : item.type === 'code' ? '💻' : '📁'}
+                            ${item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                            ${item.language ? ` (${item.language})` : ''}
+                        </div>
+                        <div class="history-item-time">${formatTime(item.timestamp)}</div>
+                        <button class="history-item-delete" onclick="event.stopPropagation(); historyManager.removeItem(${item.id})">Delete</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (seconds < 60) return 'just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        function loadHistoryItem(id) {
+            const item = historyManager.getItem(id);
+            if (!item) return;
+
+            if (item.type === 'text') {
+                switchTab('text-tab');
+                document.getElementById('text-input').value = item.content;
+                document.getElementById('text-summary').textContent = item.summary;
+                document.getElementById('text-result').style.display = 'block';
+            } else if (item.type === 'code') {
+                switchTab('code-tab');
+                document.getElementById('code-input').value = item.content;
+                if (item.language) {
+                    document.getElementById('code-language').value = item.language;
+                }
+                document.getElementById('code-summary').textContent = item.summary;
+                document.getElementById('code-result').style.display = 'block';
+            } else if (item.type === 'file') {
+                switchTab('file-tab');
+                document.getElementById('file-name').textContent = 'From history: ' + item.title;
+                document.getElementById('file-summary').textContent = item.summary;
+                document.getElementById('file-result').style.display = 'block';
+            }
+        }
+
+        function clearAllHistory() {
+            historyManager.clearAll();
+        }
+
+        // Initialize history manager
+        let historyManager = new HistoryManager();
+
+        // ============ EXISTING CODE ============
         // Hide loading screen on page load
         window.addEventListener('load', () => {
             const loadingScreen = document.getElementById('loading-screen');
@@ -960,6 +1247,18 @@
                 loadingScreen.classList.add('hidden');
             }, 2000);
         });
+
+        // Tab switching
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-button');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
 
         // AI Detection Function
         async function detectAI(text, elementId) {
@@ -1017,321 +1316,198 @@
                     </div>
 
                     <div class="ai-analysis">
-                        <strong>📊 Analysis Summary:</strong><br/>
-                        ${analysis.summary}
+                        <strong>Analysis:</strong> ${analysis.analysis}
                     </div>
 
                     <div class="ai-features">
-                        <strong>🔎 Key Indicators:</strong>
-                        ${analysis.features.map(f => `
-                            <div class="ai-feature ${f.level}">
-                                ${f.icon} <strong>${f.name}:</strong> ${f.value}
-                            </div>
-                        `).join('')}
+                        <strong>Key Indicators:</strong>
+                        ${analysis.features.map(f => `<div class="ai-feature ${f.level}">• ${f.name}: ${f.description}</div>`).join('')}
                     </div>
                 `;
 
                 resultsElement.innerHTML = resultHTML;
             } catch (error) {
-                resultsElement.innerHTML = '<div class="grammar-error">⚠️ Error analyzing text. Please try again.</div>';
-                console.error('AI detection error:', error);
+                showError('text-error', 'Error analyzing text for AI content.');
             } finally {
                 aiBtn.disabled = false;
             }
         }
 
-        // AI Detection Analysis Engine
         function analyzeTextForAI(text) {
-            const cleanText = text.toLowerCase();
-            const words = cleanText.split(/\s+/);
-            const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+            const words = text.toLowerCase().split(/\s+/);
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim());
             
             let aiScore = 0;
             const features = [];
 
-            // 1. Check for repetitive patterns
+            // Check for AI patterns
+            const aiPatterns = {
+                'Passive voice': { regex: /\b(is|are|was|were)\s+\w+ed\b/g, weight: 2 },
+                'Complex vocabulary': { regex: /\b(notwithstanding|aforementioned|cognizant|utilized)\b/g, weight: 3 },
+                'Perfect transitions': { regex: /\b(furthermore|moreover|nevertheless|consequently)\b/g, weight: 2 },
+                'Repetitive structure': { regex: null, weight: 0 }
+            };
+
+            // Analyze vocabulary complexity
+            const complexWords = text.match(/\b[a-z]{10,}\b/gi) || [];
+            if (complexWords.length / words.length > 0.15) {
+                aiScore += 15;
+                features.push({
+                    name: 'Complex Vocabulary',
+                    description: 'Uses sophisticated terminology',
+                    level: 'high'
+                });
+            }
+
+            // Analyze passive voice
+            const passiveMatches = text.match(/\b(is|are|was|were)\s+\w+ed\b/gi) || [];
+            if (passiveMatches.length / sentences.length > 0.3) {
+                aiScore += 20;
+                features.push({
+                    name: 'Passive Voice Usage',
+                    description: 'Frequent use of passive constructions',
+                    level: 'high'
+                });
+            }
+
+            // Analyze sentence length
+            const avgSentenceLength = words.length / sentences.length;
+            if (avgSentenceLength > 20) {
+                aiScore += 10;
+                features.push({
+                    name: 'Long Sentences',
+                    description: 'Average sentence exceeds 20 words',
+                    level: 'medium'
+                });
+            }
+
+            // Analyze repetitive patterns
             const wordFreq = {};
             words.forEach(word => {
-                if (word.length > 4) {
+                if (word.length > 3) {
                     wordFreq[word] = (wordFreq[word] || 0) + 1;
                 }
             });
-            const repetitiveWords = Object.values(wordFreq).filter(f => f > 5).length;
-            if (repetitiveWords > 0) {
-                aiScore += Math.min(repetitiveWords * 3, 20);
+
+            const repetitiveWords = Object.values(wordFreq).filter(count => count > 3).length;
+            if (repetitiveWords / Object.keys(wordFreq).length > 0.2) {
+                aiScore += 12;
                 features.push({
                     name: 'Repetitive Patterns',
-                    value: `${repetitiveWords} high-frequency words`,
-                    level: repetitiveWords > 3 ? 'high' : 'medium',
-                    icon: '🔄'
+                    description: 'Similar words appear frequently',
+                    level: 'medium'
                 });
             }
 
-            // 2. Check sentence length consistency
-            const sentenceLengths = sentences.map(s => s.trim().split(/\s+/).length);
-            const avgLength = sentenceLengths.reduce((a, b) => a + b, 0) / sentenceLengths.length;
-            const variance = sentenceLengths.reduce((sum, len) => sum + Math.pow(len - avgLength, 2), 0) / sentenceLengths.length;
-            const stdDev = Math.sqrt(variance);
-            if (stdDev < 3) {
-                aiScore += 15;
-                features.push({
-                    name: 'Sentence Length Consistency',
-                    value: 'Very uniform sentence lengths',
-                    level: 'high',
-                    icon: '📏'
-                });
-            } else {
-                features.push({
-                    name: 'Sentence Length Consistency',
-                    value: 'Natural variation in length',
-                    level: 'low',
-                    icon: '📏'
-                });
-            }
-
-            // 3. Check for generic phrases
-            const genericPhrases = [
-                'in conclusion', 'in summary', 'therefore', 'thus', 'in essence',
-                'as mentioned', 'in addition', 'furthermore', 'moreover', 'clearly',
-                'it is important to note', 'it is worth noting', 'it is evident'
-            ];
-            const genericCount = genericPhrases.filter(phrase => cleanText.includes(phrase)).length;
-            if (genericCount > 3) {
-                aiScore += genericCount * 4;
-                features.push({
-                    name: 'Generic Phrases',
-                    value: `${genericCount} formal transition phrases detected`,
-                    level: 'high',
-                    icon: '🎭'
-                });
-            }
-
-            // 4. Check for contractions (humans use more)
-            const contractions = (text.match(/\b(don't|won't|can't|isn't|aren't|haven't|hasn't|shouldn't|wouldn't|couldn't|didn't|I'm|he's|she's|it's|that's|what's|who's|where's|when's|why's|how's|we're|they're|we've|they've|we'd|they'd)\b/gi) || []).length;
-            if (contractions < 2) {
-                aiScore += 10;
-                features.push({
-                    name: 'Contractions (Lack Thereof)',
-                    value: `Only ${contractions} contractions found`,
-                    level: 'medium',
-                    icon: '🚫'
-                });
-            } else {
-                features.push({
-                    name: 'Contractions',
-                    value: `${contractions} contractions (natural)`,
-                    level: 'low',
-                    icon: '✅'
-                });
-            }
-
-            // 5. Check for personal pronouns and emotional language
-            const personalPronouns = (text.match(/\b(I|me|my|we|us|our|you|your)\b/gi) || []).length;
-            const emotionalWords = (text.match(/\b(amazing|wonderful|terrible|awful|love|hate|feel|emotional|personal)\b/gi) || []).length;
-            const humanMarkers = personalPronouns + emotionalWords;
-            
-            if (humanMarkers > 5) {
+            // Human indicators
+            if (text.match(/\b(I|me|my|we|us|our)\b/gi)) {
                 aiScore -= 15;
                 features.push({
-                    name: 'Personal Voice & Emotion',
-                    value: `${humanMarkers} personal/emotional markers`,
-                    level: 'low',
-                    icon: '❤️'
-                });
-            } else if (humanMarkers === 0) {
-                aiScore += 10;
-                features.push({
-                    name: 'Personal Voice & Emotion',
-                    value: 'No personal markers detected',
-                    level: 'high',
-                    icon: '❌'
+                    name: 'Personal Pronouns',
+                    description: 'Contains first-person perspective',
+                    level: 'low'
                 });
             }
 
-            // 6. Check for unusual word combinations (AI often creates them)
-            const avgWordLength = words.reduce((sum, w) => sum + w.length, 0) / words.length;
-            if (avgWordLength > 6) {
-                aiScore += 8;
-                features.push({
-                    name: 'Vocabulary Complexity',
-                    value: `Average word length: ${avgWordLength.toFixed(1)} chars`,
-                    level: 'medium',
-                    icon: '📚'
-                });
-            }
-
-            // 7. Check text length
-            if (text.length < 200) {
+            if (text.match(/[!?]{2,}|\.{3,}/g)) {
                 aiScore -= 10;
                 features.push({
-                    name: 'Text Length',
-                    value: 'Short text (harder to analyze)',
-                    level: 'low',
-                    icon: '📝'
-                });
-            } else {
-                features.push({
-                    name: 'Text Length',
-                    value: `${text.length} characters (sufficient)`,
-                    level: 'low',
-                    icon: '📄'
+                    name: 'Emotional Expression',
+                    description: 'Uses emphatic punctuation',
+                    level: 'low'
                 });
             }
 
-            // Clamp score between 0 and 100
             aiScore = Math.max(0, Math.min(100, aiScore));
 
-            // Determine verdict
             let verdict = 'mixed';
-            let verdictText = '⚠️ Mixed Signals - Could be either AI or human';
-            
-            if (aiScore > 65) {
+            let verdictText = '⚠️ Mixed Indicators';
+
+            if (aiScore > 70) {
                 verdict = 'likely-ai';
                 verdictText = '🤖 Likely AI-Generated';
-            } else if (aiScore < 35) {
+            } else if (aiScore < 30) {
                 verdict = 'likely-human';
-                verdictText = '👤 Likely Human-Written';
+                verdictText = '✍️ Likely Human-Written';
             }
-
-            const summary = generateAISummary(aiScore, features);
 
             return {
                 aiScore,
                 verdict,
                 verdictText,
-                features,
-                summary
+                analysis: aiScore > 70 
+                    ? 'This text exhibits multiple characteristics commonly found in AI-generated content, including extensive passive voice usage, formal vocabulary, and structured sentence patterns.'
+                    : aiScore < 30
+                    ? 'This text shows strong indicators of human authorship, including personal perspective, natural language patterns, and authentic expression.'
+                    : 'This text contains mixed indicators, with both human and AI-like characteristics present.',
+                features
             };
         }
 
-        function generateAISummary(score, features) {
-            let summary = '';
-            if (score > 65) {
-                summary = 'This text shows strong markers of AI generation. Multiple indicators suggest automated content creation, including formal language patterns, consistent structure, and use of generic phrases.';
-            } else if (score > 40) {
-                summary = 'This text has some characteristics of AI-generated content, but also shows signs of human writing. The analysis is inconclusive - it could be either AI-assisted or human-written content.';
-            } else {
-                summary = 'This text appears to be human-written. It displays natural patterns in language use, including personal voice, emotional expression, and varied sentence structure typical of human communication.';
-            }
-            return summary;
-        }
-
-        // Detect AI for text tab
-        function detectAIText() {
-            const text = document.getElementById('text-input').value;
-            detectAI(text, 'text-ai-results');
-        }
-
-        // Grammar Checker - Uses free LanguageTool API
-        async function checkGrammar(text, elementId) {
-            const resultsElement = document.getElementById(elementId);
-            const checkBtn = document.getElementById(elementId.replace('-grammar-results', '-check-btn'));
-            
-            if (!text.trim()) {
-                showError('text-error', 'Please enter some text to check.');
-                return;
-            }
-
-            checkBtn.disabled = true;
-            resultsElement.innerHTML = '<div style="text-align: center; padding: 10px;"><div class="spinner"></div><span class="loading-text">Checking grammar...</span></div>';
-            resultsElement.classList.add('active');
-
-            try {
-                const response = await fetch('https://api.languagetool.org/v2/check', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        'text': text,
-                        'language': 'en-US'
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.matches && data.matches.length > 0) {
-                    let resultsHTML = '';
-                    data.matches.forEach((match, index) => {
-                        resultsHTML += `
-                            <div class="grammar-item">
-                                <div class="grammar-error">
-                                    ❌ Issue ${index + 1}: ${match.rule.category}
-                                </div>
-                                <div class="grammar-message">
-                                    <strong>Text:</strong> "${match.context.text.substring(Math.max(0, match.context.offset - 20), match.context.offset + match.length + 20)}"
-                                </div>
-                                ${match.replacements && match.replacements.length > 0 ? `
-                                    <div class="grammar-suggestion">
-                                        <strong>💡 Suggestions:</strong> ${match.replacements.map(r => r.value).slice(0, 3).join(', ')}
-                                    </div>
-                                ` : ''}
-                                <div class="grammar-message">
-                                    📝 ${match.message}
-                                </div>
-                            </div>
-                        `;
-                    });
-                    resultsElement.innerHTML = resultsHTML;
-                } else {
-                    resultsElement.innerHTML = '<div class="no-errors">✅ No grammar or spelling errors found!</div>';
-                }
-            } catch (error) {
-                resultsElement.innerHTML = '<div class="grammar-error">⚠️ Error checking grammar. Please try again.</div>';
-                console.error('Grammar check error:', error);
-            } finally {
-                checkBtn.disabled = false;
-            }
-        }
-
-        // Check grammar for text tab
-        function checkGrammarText() {
-            const text = document.getElementById('text-input').value;
-            checkGrammar(text, 'text-grammar-results');
-        }
-
-        // Tab switching
-        function switchTab(tabName) {
-            const tabs = document.querySelectorAll('.tab-content');
-            tabs.forEach(tab => tab.classList.remove('active'));
-
-            const buttons = document.querySelectorAll('.tab-button');
-            buttons.forEach(btn => btn.classList.remove('active'));
-
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
-        }
-
-        // Text Summarization
+        // Summarize Text
         async function summarizeText() {
-            const text = document.getElementById('text-input').value.trim();
+            const text = document.getElementById('text-input').value;
             const minLength = parseInt(document.getElementById('text-min-length').value);
             const maxLength = parseInt(document.getElementById('text-max-length').value);
 
-            if (!text) {
+            if (!text.trim()) {
                 showError('text-error', 'Please enter some text to summarize.');
                 return;
             }
 
-            await sendSummarizeRequest('text', text, minLength, maxLength, 'text');
+            document.getElementById('text-loading').classList.add('active');
+            document.getElementById('text-error').style.display = 'none';
+            document.getElementById('text-result').style.display = 'none';
+
+            try {
+                const summary = generateSummary(text, minLength, maxLength);
+                
+                document.getElementById('text-summary').textContent = summary;
+                document.getElementById('text-result').style.display = 'block';
+                
+                // Save to history
+                historyManager.addItem(text, summary, 'text');
+
+                document.getElementById('text-loading').classList.remove('active');
+            } catch (error) {
+                showError('text-error', 'Error summarizing text. Please try again.');
+                document.getElementById('text-loading').classList.remove('active');
+            }
         }
 
-        // Code Summarization
+        // Summarize Code
         async function summarizeCode() {
-            const code = document.getElementById('code-input').value.trim();
+            const code = document.getElementById('code-input').value;
             const language = document.getElementById('code-language').value;
             const minLength = parseInt(document.getElementById('code-min-length').value);
             const maxLength = parseInt(document.getElementById('code-max-length').value);
 
-            if (!code) {
+            if (!code.trim()) {
                 showError('code-error', 'Please enter some code to summarize.');
                 return;
             }
 
-            await sendSummarizeRequest('code', code, minLength, maxLength, 'code', language);
+            document.getElementById('code-loading').classList.add('active');
+            document.getElementById('code-error').style.display = 'none';
+            document.getElementById('code-result').style.display = 'none';
+
+            try {
+                const summary = generateCodeSummary(code, language, minLength, maxLength);
+                
+                document.getElementById('code-summary').textContent = summary;
+                document.getElementById('code-result').style.display = 'block';
+                
+                // Save to history
+                historyManager.addItem(code, summary, 'code', language);
+
+                document.getElementById('code-loading').classList.remove('active');
+            } catch (error) {
+                showError('code-error', 'Error summarizing code. Please try again.');
+                document.getElementById('code-loading').classList.remove('active');
+            }
         }
 
-        // File Summarization
+        // Summarize File
         async function summarizeFile() {
             const fileInput = document.getElementById('file-input');
             if (!fileInput.files.length) {
@@ -1343,132 +1519,192 @@
             const minLength = parseInt(document.getElementById('file-min-length').value);
             const maxLength = parseInt(document.getElementById('file-max-length').value);
 
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const content = e.target.result;
-                const type = file.name.endsWith('.py') ? 'code' : file.name.endsWith('.js') || file.name.endsWith('.cpp') || file.name.endsWith('.java') ? 'code' : 'text';
-                await sendSummarizeRequest('file', content, minLength, maxLength, type);
-            };
-            reader.readAsText(file);
-        }
-
-        // Send summarization request
-        async function sendSummarizeRequest(endpoint, content, minLength, maxLength, type, language = '') {
-            const loadingId = `${endpoint}-loading`;
-            const errorId = `${endpoint}-error`;
-            const resultId = `${endpoint}-result`;
-            const summaryId = `${endpoint}-summary`;
-            const btnId = `${endpoint}-summarize-btn`;
-            const inlineBtnId = `${endpoint}-summarize-inline-btn`;
-
-            // Show loading state and disable button
-            document.getElementById(loadingId).classList.add('active');
-            document.getElementById(errorId).style.display = 'none';
-            document.getElementById(resultId).style.display = 'none';
-            if (document.getElementById(btnId)) {
-                document.getElementById(btnId).disabled = true;
-            }
-            if (document.getElementById(inlineBtnId)) {
-                document.getElementById(inlineBtnId).disabled = true;
-            }
+            document.getElementById('file-loading').classList.add('active');
+            document.getElementById('file-error').style.display = 'none';
+            document.getElementById('file-result').style.display = 'none';
 
             try {
-                // Simulate AI summarization with delay
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                const text = await file.text();
+                const summary = generateSummary(text, minLength, maxLength);
                 
-                const summary = generateMockSummary(content, minLength, maxLength);
+                document.getElementById('file-summary').textContent = summary;
+                document.getElementById('file-result').style.display = 'block';
+                
+                // Save to history
+                historyManager.addItem(text, summary, 'file');
 
-                // Hide loading and re-enable button
-                document.getElementById(loadingId).classList.remove('active');
-                if (document.getElementById(btnId)) {
-                    document.getElementById(btnId).disabled = false;
-                }
-                if (document.getElementById(inlineBtnId)) {
-                    document.getElementById(inlineBtnId).disabled = false;
-                }
-
-                // Show result
-                document.getElementById(summaryId).textContent = summary;
-                document.getElementById(resultId).style.display = 'block';
-
-                // Show success message
-                showSuccess(errorId, '✓ Summary generated successfully!');
+                document.getElementById('file-loading').classList.remove('active');
             } catch (error) {
-                document.getElementById(loadingId).classList.remove('active');
-                if (document.getElementById(btnId)) {
-                    document.getElementById(btnId).disabled = false;
-                }
-                if (document.getElementById(inlineBtnId)) {
-                    document.getElementById(inlineBtnId).disabled = false;
-                }
-                showError(errorId, '❌ Error: ' + error.message);
+                showError('file-error', 'Error reading or summarizing file. Please try again.');
+                document.getElementById('file-loading').classList.remove('active');
             }
         }
 
-        // Mock summarization function
-        function generateMockSummary(content, minLength, maxLength) {
-            const sentences = content.match(/[^.!?]+[.!?]+/g) || [content];
-            let summary = '';
-            let length = 0;
+        // Generate Summary (Mock function)
+        function generateSummary(text, minLength, maxLength) {
+            const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+            if (sentences.length === 0) return text;
 
-            for (let sentence of sentences) {
-                summary += sentence.trim() + ' ';
-                length += sentence.length;
-                if (length >= minLength) break;
+            const scored = sentences.map((sentence, index) => ({
+                sentence: sentence.trim(),
+                score: calculateSentenceScore(sentence, text),
+                index
+            })).sort((a, b) => b.score - a.score);
+
+            const selectedSentences = scored.slice(0, Math.ceil(sentences.length * 0.4))
+                .sort((a, b) => a.index - b.index)
+                .map(s => s.sentence)
+                .join(' ');
+
+            if (selectedSentences.length < minLength) {
+                return selectedSentences + ' ' + sentences.slice(0, 2).join(' ');
             }
 
-            if (summary.length > maxLength) {
-                summary = summary.substring(0, maxLength) + '...';
-            }
-
-            return summary.trim() || 'Unable to generate summary.';
+            return selectedSentences.substring(0, maxLength) + (selectedSentences.length > maxLength ? '...' : '');
         }
 
-        // Copy summary to clipboard
+        function generateCodeSummary(code, language, minLength, maxLength) {
+            const lines = code.split('\n').filter(line => line.trim());
+            const comments = lines.filter(line => /^\s*(\/\/|#|\/\*|\*)/.test(line)).map(l => l.trim());
+            
+            let summary = `Code snippet in ${language || 'unknown language'}:\n`;
+            
+            if (comments.length > 0) {
+                summary += 'Comments and documentation:\n' + comments.slice(0, 3).join('\n') + '\n\n';
+            }
+
+            const functionMatches = code.match(/(?:function|def|class|interface)\s+\w+/gi) || [];
+            if (functionMatches.length > 0) {
+                summary += 'Key components: ' + [...new Set(functionMatches)].slice(0, 5).join(', ');
+            }
+
+            if (summary.length < minLength) {
+                summary += '\n\nCode overview: This snippet contains ' + lines.length + ' lines of code with ' + functionMatches.length + ' major components.';
+            }
+
+            return summary.substring(0, maxLength) + (summary.length > maxLength ? '...' : '');
+        }
+
+        function calculateSentenceScore(sentence, text) {
+            const words = sentence.toLowerCase().split(/\s+/);
+            const textWords = text.toLowerCase().split(/\s+/);
+            const wordFreq = {};
+
+            textWords.forEach(word => {
+                wordFreq[word] = (wordFreq[word] || 0) + 1;
+            });
+
+            let score = 0;
+            words.forEach(word => {
+                score += (wordFreq[word] || 0) * (word.length > 3 ? 2 : 1);
+            });
+
+            return score / words.length;
+        }
+
+        // Check Grammar Text
+        async function checkGrammarText() {
+            const text = document.getElementById('text-input').value;
+            const resultsDiv = document.getElementById('text-grammar-results');
+
+            if (!text.trim()) {
+                showError('text-error', 'Please enter some text to check.');
+                return;
+            }
+
+            resultsDiv.innerHTML = '<div style="text-align: center;"><div class="spinner"></div><span class="loading-text">Checking grammar...</span></div>';
+            resultsDiv.classList.add('active');
+
+            try {
+                const issues = checkGrammar(text);
+                
+                if (issues.length === 0) {
+                    resultsDiv.innerHTML = '<div class="no-errors">✅ No grammar or spelling errors found!</div>';
+                } else {
+                    resultsDiv.innerHTML = issues.map((issue, index) => `
+                        <div class="grammar-item">
+                            <div class="grammar-error">Error ${index + 1}: ${issue.error}</div>
+                            <div class="grammar-suggestion">✓ Suggestion: ${issue.suggestion}</div>
+                            <div class="grammar-message">${issue.message}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                showError('text-error', 'Error checking grammar. Please try again.');
+            }
+        }
+
+        function checkGrammar(text) {
+            const issues = [];
+
+            // Simple grammar checks
+            const patterns = [
+                { regex: /\ba\s+[aeiou]/g, error: 'Use "an" before vowels', suggestion: 'Replace "a" with "an"', message: 'Articles should match the following word' },
+                { regex: /\s{2,}/g, error: 'Double spaces detected', suggestion: 'Use single spaces', message: 'Multiple consecutive spaces found' },
+                { regex: /\b(their|there|they're)\s+not\b/g, error: 'Check "their/there/they\'re" usage', suggestion: 'Verify correct spelling', message: 'Common homophone error' }
+            ];
+
+            patterns.forEach(pattern => {
+                const matches = text.match(pattern.regex) || [];
+                matches.forEach((match, index) => {
+                    if (index < 3) {
+                        issues.push({
+                            error: pattern.error,
+                            suggestion: pattern.suggestion,
+                            message: pattern.message
+                        });
+                    }
+                });
+            });
+
+            return issues.slice(0, 5);
+        }
+
+        // Detect AI Text
+        async function detectAIText() {
+            const text = document.getElementById('text-input').value;
+            await detectAI(text, 'text-ai-results');
+        }
+
+        // Copy Summary
         function copySummary(elementId) {
             const text = document.getElementById(elementId).textContent;
             navigator.clipboard.writeText(text).then(() => {
-                showSuccess('text-error', '📋 Copied to clipboard!');
-                setTimeout(() => {
-                    document.getElementById('text-error').style.display = 'none';
-                }, 2000);
+                showSuccess('Summary copied to clipboard!');
+            }).catch(() => {
+                showError('text-error', 'Failed to copy text.');
             });
         }
 
-        // Show error message
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #e8f5e9; color: #2e7d32; padding: 15px; border-radius: 6px; border-left: 4px solid #4CAF50; z-index: 10000;';
+            successDiv.textContent = message;
+            document.body.appendChild(successDiv);
+
+            setTimeout(() => successDiv.remove(), 3000);
+        }
+
+        // Show Error
         function showError(elementId, message) {
-            const element = document.getElementById(elementId);
-            element.textContent = message;
-            element.style.display = 'block';
+            const errorDiv = document.getElementById(elementId);
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
         }
 
-        // Show success message
-        function showSuccess(elementId, message) {
-            const element = document.getElementById(elementId);
-            element.textContent = message;
-            element.className = 'success';
-            element.style.display = 'block';
-            setTimeout(() => {
-                element.style.display = 'none';
-                element.className = 'error';
-            }, 3000);
-        }
-
-        // Clear functions
+        // Clear Functions
         function clearText() {
             document.getElementById('text-input').value = '';
             document.getElementById('text-result').style.display = 'none';
             document.getElementById('text-error').style.display = 'none';
-            document.getElementById('text-loading').classList.remove('active');
-            document.getElementById('text-grammar-results').classList.remove('active');
-            document.getElementById('text-ai-results').classList.remove('active');
         }
 
         function clearCode() {
             document.getElementById('code-input').value = '';
             document.getElementById('code-result').style.display = 'none';
             document.getElementById('code-error').style.display = 'none';
-            document.getElementById('code-loading').classList.remove('active');
         }
 
         function clearFile() {
@@ -1476,10 +1712,9 @@
             document.getElementById('file-name').textContent = '';
             document.getElementById('file-result').style.display = 'none';
             document.getElementById('file-error').style.display = 'none';
-            document.getElementById('file-loading').classList.remove('active');
         }
 
-        // File drag and drop
+        // File handling
         const fileLabel = document.getElementById('file-label');
         const fileInput = document.getElementById('file-input');
 
@@ -1495,24 +1730,16 @@
         fileLabel.addEventListener('drop', (e) => {
             e.preventDefault();
             fileLabel.classList.remove('dragover');
-            fileInput.files = e.dataTransfer.files;
-            updateFileName();
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                document.getElementById('file-name').textContent = files[0].name;
+            }
         });
 
-        fileInput.addEventListener('change', updateFileName);
-
-        function updateFileName() {
-            const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : '';
-            document.getElementById('file-name').textContent = fileName ? `✓ ${fileName}` : '';
-        }
-
-        // Keyboard shortcuts - Ctrl+Enter or Cmd+Enter
-        document.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                const activeTab = document.querySelector('.tab-content.active').id;
-                if (activeTab === 'text-tab') summarizeText();
-                else if (activeTab === 'code-tab') summarizeCode();
-                else if (activeTab === 'file-tab') summarizeFile();
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                document.getElementById('file-name').textContent = e.target.files[0].name;
             }
         });
     </script>
